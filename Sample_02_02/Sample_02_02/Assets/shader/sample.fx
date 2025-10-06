@@ -39,4 +39,5 @@ float4 PSMain(VSOutput vsOut) : SV_Target0
 	//return float4(1.0f,1.0f,0.0f,0.0f);
 
 	// step-4 頂点シェーダーから受け取ったカラーを出力する
+	
 }

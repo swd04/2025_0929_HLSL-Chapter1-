@@ -98,5 +98,4 @@ void TrianglePolygon::InitIndexBuffer()
 	
 	m_indexBuffer.Init(sizeof(indices), 2);
 	m_indexBuffer.Copy(static_cast<uint16_t*>(indices));
-
 }
