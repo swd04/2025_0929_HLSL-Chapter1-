@@ -6,41 +6,52 @@
 ///////////////////////////////////////////////////////////////////
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-    // ゲームの初期化
-    InitGame(hInstance, hPrevInstance, lpCmdLine, nCmdShow, TEXT("Game"));
+	// ゲームの初期化
+	InitGame(hInstance, hPrevInstance, lpCmdLine, nCmdShow, TEXT("Game"));
 
-    //////////////////////////////////////
-    // ここから初期化を行うコードを記述する
-    //////////////////////////////////////
+	//////////////////////////////////////
+	// ここから初期化を行うコードを記述する
+	//////////////////////////////////////
 
-    g_camera3D->SetPosition({ 0.0f, 50.0f, 100.0f });
+	g_camera3D->SetPosition({ 0.0f, 50.0f, 100.0f });
 
-    // step-1 3Dモデルをロードするための情報を設定する
+	// step-1 3Dモデルをロードするための情報を設定する
+	ModelInitData initData;
 
-    // step-2 初期化情報を使ってモデル表示処理を初期化する
+	// .tkmファイルのファイルパスを設定する
+	initData.m_tkmFilePath = "Assets/modelData/sample.tkm";
 
-    //////////////////////////////////////
-    // 初期化を行うコードを書くのはここまで！！！
-    //////////////////////////////////////
-    auto& renderContext = g_graphicsEngine->GetRenderContext();
+	// 使用するシェーダーファイルパスを設定する
+	initData.m_fxFilePath = "Assets/shader/sample.fx";
 
-    // ここからゲームループ
-    while (DispatchWindowMessage())
-    {
-        // レンダリング開始
-        g_engine->BeginFrame();
+	// step-2 初期化情報を使ってモデル表示処理を初期化する
+	Model charaModel;
+	charaModel.Init(initData);
 
-        //////////////////////////////////////
-        // ここから絵を描くコードを記述する
-        //////////////////////////////////////
+	//////////////////////////////////////
+	// 初期化を行うコードを書くのはここまで！！！
+	//////////////////////////////////////
+	auto& renderContext = g_graphicsEngine->GetRenderContext();
 
-        // step-3 モデルのドローコールを実行する
+	// ここからゲームループ
+	while (DispatchWindowMessage())
+	{
+		// レンダリング開始
+		g_engine->BeginFrame();
 
-        //////////////////////////////////////
-        // 絵を描くコードを書くのはここまで！！！
-        //////////////////////////////////////
-        // レンダリング終了
-        g_engine->EndFrame();
-    }
-    return 0;
+		//////////////////////////////////////
+		// ここから絵を描くコードを記述する
+		//////////////////////////////////////
+
+		// step-3 モデルのドローコールを実行する
+		charaModel.Draw(renderContext);
+
+		//////////////////////////////////////
+		// 絵を描くコードを書くのはここまで！！！
+		//////////////////////////////////////
+		// レンダリング終了
+		g_engine->EndFrame();
+	}
+
+	return 0;
 }
