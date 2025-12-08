@@ -73,6 +73,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         // 1フレーム終了
         g_engine->EndFrame();
     }
+
     return 0;
 }
 
