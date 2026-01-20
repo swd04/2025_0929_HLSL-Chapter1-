@@ -8,7 +8,7 @@ cbuffer cb : register(b0)
     float4 mulColor;        // 乗算カラー
 };
 
-cbuffer NagaCB : register( b1 )
+cbuffer NagaCB : register(b1)
 {
     float negaRate;         // ネガポジ反転率
 };
