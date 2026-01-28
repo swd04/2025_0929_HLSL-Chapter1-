@@ -155,4 +155,3 @@ void InitRootSignature( RootSignature& rs )
         D3D12_TEXTURE_ADDRESS_MODE_WRAP,
         D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 }
-
