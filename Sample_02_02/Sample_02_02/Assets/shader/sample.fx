@@ -10,6 +10,7 @@ struct VSOutput
 {
 	float4 pos : SV_POSITION;
 	float3 color : COLOR; // カラーの情報も出力する
+	float2 localPos : TEXCOORD0;
 };
 
 // 頂点シェーダー
@@ -18,32 +19,47 @@ struct VSOutput
 VSOutput VSMain(VSInput In)
 {
 	VSOutput vsOut = (VSOutput)0;
+
 	vsOut.pos = In.pos;
-	vsOut.color = In.color; // カラーの情報を出力する
+	vsOut.color = In.color;
+	vsOut.localPos = In.pos.xy;
+
 	return vsOut;
 }
 
 // ピクセルシェーダー
 float4 PSMain(VSOutput vsOut) : SV_Target0
 {
-	// 赤色を出力している
-	// return float4(1.0f, 0.0f , 0.0f, 1.0f);
+	//// 赤色を出力している
+	//return float4(1.0f, 0.0f , 0.0f, 1.0f);
 
-	// step-1 三角形を青色にする
-	// return float4(0.0f, 0.0f, 1.0f, 1.0f);
+	//// step-1 三角形を青色にする
+	//return float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-	// step-2 三角形を緑色にする
-	// return float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//// step-2 三角形を緑色にする
+	//return float4(0.0f, 1.0f, 0.0f, 1.0f);
 
-	// step-3 三角形を黄色にする
-	// return float4(1.0f, 1.0f, 0.0f, 1.0f);
+	//// step-3 三角形を黄色にする
+	//return float4(1.0f, 1.0f, 0.0f, 1.0f);
 
-	// step-4 頂点シェーダーから受け取ったカラーを出力する
-	float4 color;
-	color.x = vsOut.color.x;
-	color.y = vsOut.color.y;
-	color.z = vsOut.color.z;
-	color.w = 1.0f; // 今はαは気にしない
+	//// step-4 頂点シェーダーから受け取ったカラーを出力する
+	////float4 color;
+	//color.x = vsOut.color.x;
+	//color.y = vsOut.color.y;
+	//color.z = vsOut.color.z;
+	//color.w = 1.0f; // 今はαは気にしない
 
-	return color;
+	//return color;
+
+	float y = vsOut.localPos.y * 0.5f + 0.5f;
+
+	float stripe = step(0.5f, frac(y * 10.0f));
+
+	float3 stripeColor = lerp(
+		float3(1.0f, 1.0f, 1.0f),
+		float3(0.0f, 0.0f, 0.0f),
+		stripe
+	);
+
+	return float4(stripeColor, 1.0f);
 }
