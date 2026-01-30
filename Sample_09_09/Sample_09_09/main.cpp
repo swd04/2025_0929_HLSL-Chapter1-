@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "system/system.h"
+#include <cmath> 
 
 // 頂点構造体
 struct SimpleVertex
@@ -54,6 +55,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     //////////////////////////////////////
     auto& renderContext = g_graphicsEngine->GetRenderContext();
 
+    float time = 0.0f;
+
     // ここからゲームループ
     while (DispatchWindowMessage())
     {
@@ -63,11 +66,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         //////////////////////////////////////
         // ここから絵を描くコードを記述する
         //////////////////////////////////////
-        // ワイプサイズを増やして少しずつワイプさせる
-        monochromeRate += 0.01f;
-        if (monochromeRate > 1.0f) {
-            monochromeRate = 1.0f;
-        }
+
+        time += 0.05f;
+        monochromeRate = (sinf(time) + 1.0f) * 0.5f;
+
         // スプライトのドローコールを実行する
         test2D.Draw(renderContext);
 
@@ -84,9 +86,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 void InitRootSignature(RootSignature& rs)
 {
     rs.Init(D3D12_FILTER_MIN_MAG_MIP_LINEAR,
-            D3D12_TEXTURE_ADDRESS_MODE_WRAP,
-            D3D12_TEXTURE_ADDRESS_MODE_WRAP,
-            D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 }
 
 // パイプラインステートの初期化

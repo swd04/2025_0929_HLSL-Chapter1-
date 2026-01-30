@@ -40,7 +40,6 @@ cbuffer DirectionLightCb : register(b1)
 {
     DirectionLight directionLight;
     float3 eyePos; // 視点の位置
-    float3 ambientLight;
 };
 
 ///////////////////////////////////////////
@@ -67,7 +66,7 @@ SPSIn VSMain(SVSIn vsIn, uniform bool hasSkin)
     psIn.pos = mul(mProj, psIn.pos);  // カメラ座標系からスクリーン座標系に変換
 
     // 頂点法線をピクセルシェーダーに渡す
-    psIn.normal = normalize(mul((float3x3)mWorld, vsIn.normal));
+    psIn.normal = mul(mWorld, vsIn.normal); // 法線を回転させる
     psIn.uv = vsIn.uv;
 
     return psIn;
@@ -78,10 +77,9 @@ SPSIn VSMain(SVSIn vsIn, uniform bool hasSkin)
 /// </summary>
 float4 PSMain(SPSIn psIn) : SV_Target0
 {
-    float3 N = normalize(psIn.normal);
-    float3 L = normalize(-directionLight.direction);
-
-    float t = max(dot(N, L), 0.0f);
+    // ピクセルの法線とライトの方向の内積を計算する
+    float t = dot(psIn.normal, directionLight.direction);
+    t *= -1.0f;
 
     // 内積の結果が0以下なら0にする
     if (t < 0.0f)
@@ -92,7 +90,8 @@ float4 PSMain(SPSIn psIn) : SV_Target0
     // 拡散反射光を求める
     float3 diffuseLig = directionLight.color * t;
 
-    float3 refVec = reflect(-L, N);
+    // 反射ベクトルを求める
+    float3 refVec = reflect(directionLight.direction, psIn.normal);
 
     // 光が当たったサーフェイスから視点に伸びるベクトルを求める
     float3 toEye = eyePos - psIn.worldPos;
@@ -112,10 +111,12 @@ float4 PSMain(SPSIn psIn) : SV_Target0
     float3 specularLig = directionLight.color * t;
 
     // 拡散反射光と鏡面反射光を足し算して、最終的な光を求める
-    //float3 lig = diffuseLig + specularLig;
+    float3 lig = diffuseLig + specularLig;
 
     // step-1 ライトの効果を一律で底上げする
-    float3 lig = diffuseLig + specularLig + ambientLight;
+    lig.x += 0.3f;
+    lig.y += 0.3f;
+    lig.z += 0.3f;
 
     float4 finalColor = g_texture.Sample(g_sampler, psIn.uv);
 
