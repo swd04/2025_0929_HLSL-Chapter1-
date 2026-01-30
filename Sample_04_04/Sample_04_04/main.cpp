@@ -48,9 +48,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     light.directionLight.direction.Normalize();
 
     // ライトのカラーは白
-    light.directionLight.color.x = 0.5f;
+    /*light.directionLight.color.x = 0.5f;
     light.directionLight.color.y = 0.5f;
-    light.directionLight.color.z = 0.5f;
+    light.directionLight.color.z = 0.5f;*/
+
+    light.directionLight.color = { 1.0f, 0.5f, 0.3f };
 
     // 視点の位置を設定する
     light.eyePos = g_camera3D->GetPosition();

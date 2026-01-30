@@ -40,6 +40,9 @@ cbuffer DirectionLightCb : register(b1)
 {
     DirectionLight directionLight;
     float3 eyePos; // 視点の位置
+    float pad0;
+    float3 ambientLight;
+    float pad1;
 };
 
 ///////////////////////////////////////////
@@ -77,50 +80,24 @@ SPSIn VSMain(SVSIn vsIn, uniform bool hasSkin)
 /// </summary>
 float4 PSMain(SPSIn psIn) : SV_Target0
 {
-    // ピクセルの法線とライトの方向の内積を計算する
     float t = dot(psIn.normal, directionLight.direction);
     t *= -1.0f;
+    t = max(t, 0.0f);
 
-    // 内積の結果が0以下なら0にする
-    if (t < 0.0f)
-    {
-        t = 0.0f;
-    }
-
-    // 拡散反射光を求める
     float3 diffuseLig = directionLight.color * t;
 
-    // 反射ベクトルを求める
     float3 refVec = reflect(directionLight.direction, psIn.normal);
-
-    // 光が当たったサーフェイスから視点に伸びるベクトルを求める
-    float3 toEye = eyePos - psIn.worldPos;
-    toEye = normalize(toEye);
-
-    // 鏡面反射の強さを求める
-    t = dot(refVec, toEye);
-    if (t < 0.0f)
-    {
-        t = 0.0f;
-    }
-
-    // 鏡面反射の強さを絞る
+    float3 toEye = normalize(eyePos - psIn.worldPos);
+    t = max(dot(refVec, toEye), 0.0f);
     t = pow(t, 5.0f);
-
-    // 鏡面反射光を求める
     float3 specularLig = directionLight.color * t;
 
-    // 拡散反射光と鏡面反射光を足し算して、最終的な光を求める
     float3 lig = diffuseLig + specularLig;
 
-    // step-1 ライトの効果を一律で底上げする
-    lig.x += 0.3f;
-    lig.y += 0.3f;
-    lig.z += 0.3f;
+    lig += ambientLight;
 
     float4 finalColor = g_texture.Sample(g_sampler, psIn.uv);
 
-    // テクスチャカラーに求めた光を乗算して最終出力カラーを求める
     finalColor.xyz *= lig;
 
     return finalColor;
