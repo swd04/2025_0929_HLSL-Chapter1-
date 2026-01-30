@@ -55,9 +55,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     // 視点の位置を設定する
     light.eyePos = g_camera3D->GetPosition();
 
-    light.ambientLight.x = 0.3f;
+    /*light.ambientLight.x = 0.3f;
     light.ambientLight.y = 0.3f;
-    light.ambientLight.z = 0.3f;
+    light.ambientLight.z = 0.3f;*/
+
+    light.ambientLight = { 0.4f, 0.1f, 0.1f };
 
     // モデルを初期化する
     // モデルを初期化するための情報を構築する
