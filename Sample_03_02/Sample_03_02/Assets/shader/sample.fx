@@ -31,13 +31,18 @@ VSOutput VSMain(VSInput In)
     vsOut.color = In.color; //
     return vsOut;
 }
+
 // ピクセルシェーダー
 float4 PSMain(VSOutput vsOut) : SV_Target0
 {
+    float2 uv = vsOut.uv;
+
+    uv.x = 1.0f - uv.x;
+
     // step-5 テクスチャカラーをサンプリングして返す
     float4 texColor = g_texture.Sample(
-        g_sampler,  // 第1引数はサンプラー。今は気にしなくてよい
-        vsOut.uv    // 第2引数はUV座標
+        g_sampler,
+        uv
     );
     return texColor;
 
