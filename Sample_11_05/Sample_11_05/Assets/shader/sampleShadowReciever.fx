@@ -110,7 +110,6 @@ float4 PSMain(SPSIn psIn) : SV_Target0
 			// 光が当たる確率を使って通常カラーとシャドウカラーを線形補完
 			color.xyz = lerp(shadowColor, color.xyz, lit_factor);
 		}
-
 	}
 
 	return color;
