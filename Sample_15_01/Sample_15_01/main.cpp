@@ -8,7 +8,9 @@ struct OutputData
     float maxScore;     // 最高得点
     float minScore;     // 最小得点
 
-    // step-3 出力構造体にメンバーを追加する
+    // step-3 出力構造体にメンバを追加する
+    int totalScore;     // 合計点
+    float deviation;    // 標準偏差
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -88,18 +90,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         // step-4 合計点を表示する
         sprintf(
             text,
-            "1人目 = %d\n" \
-            "2人目 = %d\n" \
-            "3人目 = %d\n" \
+            "１人目 = %d\n" \
+            "２人目 = %d\n" \
+            "３人目 = %d\n" \
             "平均点 = %0.2f\n" \
             "最高得点=%0.2f\n" \
-            "最低得点=%0.2f\n",
+            "最低得点=%0.2f\n" \
+            "合計点=%d\n" \
+            "標準偏差=%0.2f\n",
             inputData[0],
             inputData[1],
             inputData[2],
             outputData->averageScore,
             outputData->maxScore,
-            outputData->minScore
+            outputData->minScore,
+            outputData->totalScore,
+            outputData->deviation
         );
 
         MessageBoxA(nullptr, text, "成績発表", MB_OK);
