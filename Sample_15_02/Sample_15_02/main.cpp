@@ -9,55 +9,80 @@
 ///////////////////////////////////////////////////////////////////
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-    // ゲームの初期化
-    InitGame(hInstance, hPrevInstance, lpCmdLine, nCmdShow, TEXT("Game"));
+	// ゲームの初期化
+	InitGame(hInstance, hPrevInstance, lpCmdLine, nCmdShow, TEXT("Game"));
 
-    //////////////////////////////////////
-    //  ここから初期化を行うコードを記述する
-    //////////////////////////////////////
+	//////////////////////////////////////
+	//  ここから初期化を行うコードを記述する
+	//////////////////////////////////////
 
-    // step-1 画像データをメインメモリ上にロードする
+	// step-1 画像データをメインメモリ上にロードする
+	Bitmap imagebmp;
+	imagebmp.Load("Assets/image/original2.bmp");
 
-    // step-2 画像データをグラフィックスメモリに送るために構造化バッファーを作成
+	// step-2 画像データをグラフィックスメモリに送るためにストラクチャードバッファを作成
+	StructuredBuffer inputImageBmpSB;
+	inputImageBmpSB.Init(
+		imagebmp.GetPixelSizeInBytes(), // 第一引数は1画素のサイズ
+		imagebmp.GetNumPixel(),         // ピクセルの数を取得
+		imagebmp.GetImageAddress()      // 画像データの先頭アドレス
+	);
 
-    // step-3 モノクロ化した画像を受け取るための読み書き可能な構造化バッファーを作成
+	// step-3 モノクロ化した画像を受け取るためのRWストラクチャバッファを作成
+	RWStructuredBuffer outputImageBmpRWSB;
+	outputImageBmpRWSB.Init(
+		imagebmp.GetPixelSizeInBytes(), // 第一引数は1画素のサイズ
+		imagebmp.GetNumPixel(),         // ピクセルの数を取得
+		imagebmp.GetImageAddress()      // 画像データの先頭アドレス
+	);
 
-    // step-4 入力データと出力データをディスクリプタヒープに登録する
+	// step-4 入力データと出力データをディスクリプタヒープに登録する
+	DescriptorHeap ds;
+	ds.RegistShaderResource(0, inputImageBmpSB);
+	ds.RegistUnorderAccessResource(0, outputImageBmpRWSB);
+	ds.Commit();
 
-    // コンピュートシェーダーのロード
-    Shader cs;
-    cs.LoadCS("Assets/shader/sample.fx", "CSMain");
+	// コンピュートシェーダーのロード
+	Shader cs;
+	cs.LoadCS("Assets/shader/sample.fx", "CSMain");
 
-    RootSignature rs;
-    InitRootSignature(rs, cs);
+	RootSignature rs;
+	InitRootSignature(rs, cs);
 
-    PipelineState pipelineState;
-    InitPipelineState(rs, pipelineState, cs);
+	PipelineState pipelineState;
+	InitPipelineState(rs, pipelineState, cs);
 
-    //////////////////////////////////////
-    // 初期化を行うコードを書くのはここまで！！！
-    //////////////////////////////////////
-    auto& renderContext = g_graphicsEngine->GetRenderContext();
+	//////////////////////////////////////
+	// 初期化を行うコードを書くのはここまで！！！
+	//////////////////////////////////////
+	auto& renderContext = g_graphicsEngine->GetRenderContext();
 
-    // ここからゲームループ
-    while (DispatchWindowMessage())
-    {
-        // フレーム開始
-        g_engine->BeginFrame();
+	// ここからゲームループ
+	while (DispatchWindowMessage())
+	{
+		// フレーム開始
+		g_engine->BeginFrame();
 
-        //////////////////////////////////////
-        // ここからDirectComputeへのディスパッチ命令
-        //////////////////////////////////////
-        // step-5 ディスパッチコールを実行する
+		//////////////////////////////////////
+		// ここからDirectComputeへのディスパッチ命令
+		//////////////////////////////////////
 
-        // フレーム終了
-        g_engine->EndFrame();
+		// step-5 ディスパッチコールを実行する
+		renderContext.SetComputeRootSignature(rs);
+		renderContext.SetPipelineState(pipelineState);
+		renderContext.SetComputeDescriptorHeap(ds);
 
-        // step-6 モノクロにした画像を保存
+		// フレーム終了
+		g_engine->EndFrame();
 
-        MessageBox(nullptr, L"完成", L"通知", MB_OK);
-        // デストロイ
-        DestroyWindow(g_hWnd);
-    }
-    return 0;
+		// step-6 モノクロにした画像を保存
+		imagebmp.Copy(outputImageBmpRWSB.GetResourceOnCPU());
+		imagebmp.Save("Assets/image/monochrome2.bmp");
+
+		MessageBox(nullptr, L"完成", L"通知", MB_OK);
+
+		// デストロイ
+		DestroyWindow(g_hWnd);
+	}
+	return 0;
 }
