@@ -46,6 +46,7 @@ Texture2D<float4> albedoTexture : register(t0); // アルベド
 Texture2D<float4> normalTexture : register(t1); // 法線
 
 // step-6 深度テクスチャの追加
+Texture2D<float> depthTexture : register(t2); // 射影空間に正規化された深度値
 
 sampler Sampler : register(s0);
 
@@ -118,6 +119,10 @@ float4 PSMain(PSInput In) : SV_Target0
     float3 normal = normalTexture.Sample(Sampler, In.uv).xyz;
 
     // step-7 射影空間の深度値からワールド座標を復元する
+    float z = depthTexture.Sample(Sampler, In.uv);
+
+    // 射影空間の深度値からワールド座標を復元する
+    float3 worldPos = CalcWorldPosFromUVZ(In.uv, z, mViewProjInv);
 
     float3 lig = 0.0f;
 
@@ -141,7 +146,30 @@ float4 PSMain(PSInput In) : SV_Target0
             toEye);
     }
 
-    // step-8 ポイントライトを計算
+    // step-8 ポイントライトを計算する
+    for (int ligNo = 0; ligNo < NUM_POINT_LIGHT; ligNo++)
+    {
+        // 拡散反射を計算
+        // 1. 光源からサーファイスに入射するベクトルを計算
+        float3 ligDir = normalize(worldPos - pointLight[ligNo].position);
+        // 2. 光源からサーフェイスまでの距離を計算
+        float distance = length(worldPos - pointLight[ligNo].position);
+        // 3. 影響率を計算する影響率は0.0～1.0の範囲で、
+        //    指定した距離（pointsLights[i].range）を超えたら、影響率は0.0になる
+        float affect = 1.0f - min(1.0f, distance / pointLight[ligNo].range);
+        // 4. 拡散反射光を加算
+        lig += CalcLambertReflection(
+            ligDir,
+            pointLight[ligNo].color,
+            normal) * affect;
+
+        // スペキュラ反射を加算
+        lig += CalcSpecularReflection(
+            ligDir,
+            pointLight[ligNo].color,
+            normal,
+            toEye) * affect;
+    }
 
     float4 finalColor = albedo;
     finalColor.xyz *= lig;
