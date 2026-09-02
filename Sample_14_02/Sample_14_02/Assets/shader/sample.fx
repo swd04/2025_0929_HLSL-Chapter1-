@@ -32,6 +32,9 @@ cbuffer ModelCb : register(b0)
 // シェーダーリソース
 ///////////////////////////////////////////
 
+//アルベドマップのアルファ値を取得して、ティーポットの透明度として使用する
+Texture2D<float4> g_albedoMap : register(t0);
+
 // step-3 シーンテクスチャにアクセスするための変数を追加
 Texture2D<float4> g_sceneTexture : register(t10);
 
@@ -97,8 +100,25 @@ float4 PSMain(SPSIn psIn) : SV_Target0
     float uOffset = SimplexNoise(float3(uv, 0.0f) * 256.0f) * 0.02f;
 
     // シーンテクスチャからカラーをサンプリング
-    float4 stealth = g_sceneTexture.Sample(g_sampler, uv + uOffset);
+    float4 stealth = g_sceneTexture.Sample(g_sampler, uv + float2(uOffset, uOffset));
 
-    // サンプリングしたカラーを返す
-    return stealth;
+    //背景をモノクロ化
+    float gray = dot(stealth.rgb, float3(0.299f, 0.587f, 0.114f));
+
+    //輝度をRGBすべてに設定
+    float3 grayColor = float3(gray, gray, gray);
+
+    //黄色を用意
+    float3 yellow = float3(1.0f, 1.0f, 0.0f);
+
+    //モノクロと黄色を合成
+    float3 finalColor = lerp(grayColor, yellow, 0.25f);
+
+    //アルベドマップを取得
+    float4 albedo = g_albedoMap.Sample(g_sampler, psIn.uv);
+    
+    float alpha = albedo.a * 0.5f;
+
+    //最終的な色を出力
+    return float4(finalColor, albedo.a);
 }
